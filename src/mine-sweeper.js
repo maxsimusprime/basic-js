@@ -23,9 +23,32 @@ const { NotImplementedError } = require('../extensions/index.js');
  *  [1, 1, 1]
  * ]
  */
-function minesweeper(/* matrix */) {
-  throw new NotImplementedError('Not implemented');
-  // remove line with error and write your code here
+// соседи i,j  -  [i-1][j-1], [i-1][j], [i-1][j+1], [i][j-1], [i][j], [i][j+1], [i+1][j-1], [i+1][j], [i+1][j+1]
+const getNeigboursCount = (row, col, arr) => {
+	let count = 0;
+	for (let i=row-1; i <= row+1; i++) {  // от строки выше до строки ниже
+		for (let j=col-1; j <= col+1; j++) {  // от элемента справа до элемента слева
+			if (i === row && j === col) continue;  // пропускаем сам элемент
+			if (arr.hasOwnProperty(i) && arr[i].hasOwnProperty(j) && arr[i][j] === true) {
+				count++;
+			}
+		}
+	}
+	return count;
+}
+
+
+function minesweeper(matrix) {
+	// Глубокая копия matrix
+	const arr = JSON.parse(JSON.stringify(matrix))
+
+	for (let row=0; row < matrix.length; row++ ) {
+		for (let col=0; col < matrix[row].length; col++) {
+			const count = getNeigboursCount(row, col, matrix);
+			arr[row][col] = count; 
+		}
+	}
+	return arr;
 }
 
 module.exports = {
