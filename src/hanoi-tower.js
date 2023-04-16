@@ -21,7 +21,7 @@ function calculateHanoi(disksNumber, turnsSpeed) {
 	// прямая формула взята из интернета
 	const turns = Math.pow(2, disksNumber) - 1;  
 	const time = turns / turnsSpeed;
-	return { 'turns': turns, 'seconds': time }
+	return { 'turns': turns, 'seconds': Math.floor(time) }
 }
 
 module.exports = {
