@@ -15,21 +15,54 @@ const { NotImplementedError } = require('../extensions/index.js');
  */
 function transform(arr) {
 	if (!(arr instanceof Array)) throw new Error("'arr' parameter must be an instance of the Array!");
-	const transformed = [...arr];
+	const transformed = [];
 
-	const nav = {
-		'--discard-next': function(i, arr) { if (arr[i+1]) arr.splice(i+1, 1) },
-		'--discard-prev': function(i, arr) { arr[i-1] ? arr.splice(i-1, 2) : arr.splice(i, 1)},  // +
-		'--double-next': function(i, arr) { arr[i+1] ? arr.splice(i, 1, arr[i+1]) : arr.splice(i, 1) },  // +
-		'--double-prev': function(i, arr) { arr[i-1] ? arr.splice(i, 1, arr[i-1]) : arr.splice(i, 1) } // +
-	}
+	let isPreviousDiscared= false;
+	let isDoubleNext = false;
+	let isDiscardNext = false;
 
+	for (let el of arr) {
+		switch (el) {
 
-	let i = 0;
-	for (let i=0; i < arr.length; i++) {
-		if ( arr[i] in nav) {
-			i;
-			nav[arr[i]](i, transformed)
+			case '--discard-next':
+				isDiscardNext = true; // --discard-next было выполнено
+				break;
+
+			case '--double-next':
+				isDoubleNext = true;
+				break;
+
+			case '--discard-prev':
+				// Если предыдущая команда не --discard-next
+				if (transformed.length > 0 && !isPreviousDiscared) {
+					transformed.pop();
+					isPreviousDiscared = false;
+				}
+				break;
+
+			case '--double-prev':
+				// Если предыдущая команда не --discard-next
+				if (transformed.length > 0 && !isPreviousDiscared) {
+					transformed.push(transformed[transformed.length - 1]);
+					isPreviousDiscared= false;
+				}
+				break;
+
+			default:
+				if (isDiscardNext) {
+					isDiscardNext = false;
+					// было удалено
+					isPreviousDiscared= true;
+					break;
+				}
+				// Сброс --discard-next
+				isPreviousDiscared= false;
+				transformed.push(el)
+				if (isDoubleNext) {
+					// Сброс --double-next
+					isDoubleNext = false;
+					transformed.push(el);
+				}
 		}
 	}
 	return transformed;
